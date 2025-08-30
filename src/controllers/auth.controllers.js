@@ -23,6 +23,7 @@ const generateAccessTokennAndRefreshToken=async(userID)=>{
 
 }
 export async function Signup(req, res) {
+    console.log("I am inside the signup api");
     const { fullname, email, password } = req.body;
 
     try {
