@@ -22,66 +22,72 @@ const generateAccessTokennAndRefreshToken=async(userID)=>{
    }
 
 }
-export async function Signup(req,res) {
-    const{fullname,email,password}=req.body;
+export async function Signup(req, res) {
+    const { fullname, email, password } = req.body;
+
     try {
-        if(!fullname||!email||!password){
-            return res.status(404).json({message:"all fields are required"});
+        // Validate inputs
+        if (!fullname || !email || !password) {
+            return res.status(400).json({ message: "All fields are required" });  // Use 400 for missing fields
         }
-        if(password.length<=6){
-            return res.status(400).json({message:"password must be of length more than 6"});
+
+        if (password.length < 6) {
+            return res.status(400).json({ message: "Password must be at least 6 characters" });  // Correct password length check
         }
-        const exitUser=await User.findOne({
-            $or:[{fullname},{email}],
+
+        // Check if user already exists (email or fullname)
+        const existingUser = await User.findOne({
+            $or: [{ email }, { fullname }],
         });
-        if(exitUser){
-            return res.status(409).json({message:"email already exist"});
+
+        if (existingUser) {
+            return res.status(409).json({ message: "Email or Fullname already exists" });  // Check for email or fullname
         }
+
+        // Email validation regex
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if(!emailRegex.test(email)){
-            return res.status(400).json({message:"invalid email"})
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ message: "Invalid email" });  // Validate email format
         }
-        const idx=Math.floor(Math.random()*100)+1;
-        const randomavatar= `https://avatar.iran.liara.run/public/${idx}.png`;
-    const newuser=await User.create({
-        fullname,
-        email,
-        password,
-        avatar:randomavatar,
 
-    })
-    //todo:create the user in the stream as well 
-   try {
-     await upsertStreamUser({
-         id:newuser._id,
-         name:fullname,
-         image:newuser.avatar||"",
-        
-     })
-      console.log("stream user created ");
-   } catch (error) {
-    console.log("stream user created error ")
-    ,error.message
-   }
-     const { AccessToken, RefreshAccessToken } = await generateAccessTokennAndRefreshToken(newuser._id);
-    const createduser= await User.findById(newuser?._id).select("-password");
-   
+        // Generate random avatar
+        const idx = Math.floor(Math.random() * 100) + 1;
+        const randomavatar = `https://avatar.iran.liara.run/public/${idx}.png`;
 
-res.status(200)
-  .cookie("AccessToken", AccessToken)
-  .cookie("RefreshToken", RefreshAccessToken)
-  .json({
-    message: "signup successfully",
-    user: createduser
-  });
+        // Create the new user
+        const newUser = await User.create({
+            fullname,
+            email,
+            password,
+            avatar: randomavatar,
+        });
 
-  
-   
-}catch(error){
-    res.status(404).json({message:"signup failed",error:error});
+        // Create the user in the stream (error handling in case of failure)
+        try {
+            await upsertStreamUser({
+                id: newUser._id,
+                name: fullname,
+                image: newUser.avatar || "",
+            });
+            console.log("Stream user created");
+        } catch (error) {
+            console.error("Stream user creation error:", error.message);  // Correct error logging
+        }
 
+        // Get user data without password
+        const createdUser = await User.findById(newUser._id).select("-password");
+
+        // Send the response with user data (no tokens at this point)
+        res.status(201).json({
+            message: "Signup successful",
+            user: createdUser,
+        });
+    } catch (error) {
+        console.error("Signup failed:", error);
+        res.status(500).json({ message: "Signup failed", error: error.message });  // Use 500 for server errors
+    }
 }
-}
+
 
 export async function login(req,res){
     
