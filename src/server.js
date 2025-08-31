@@ -14,7 +14,7 @@ const port = process.env.PORT || 5000;
 
 
 app.use(cors({
-    origin: "https://talk-nest-194r.vercel.app", // apne frontend ka deployed URL yaha daalo
+    origin: "https://app-frontend-livid.vercel.app", // apne frontend ka deployed URL yaha daalo
   credentials: true
 }));
    
@@ -23,7 +23,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 // API routes
-app.use("/auth", router);
+app.use("/api/auth", router);
 app.use("/api/user", userRouter);
 app.use("/api/chat", chatRouter);
 
