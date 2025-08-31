@@ -14,10 +14,9 @@ const port = process.env.PORT || 5000;
 
 
 app.use(cors({
-  origin: "https://app-frontend-livid.vercel.app",  // exact frontend origin
+    origin: "https://talk-nest-194r.vercel.app", // apne frontend ka deployed URL yaha daalo
   credentials: true
 }));
-
    
 
 app.use(express.json());
