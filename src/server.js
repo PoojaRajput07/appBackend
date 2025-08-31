@@ -14,7 +14,8 @@ const port = process.env.PORT || 5000;
 
 
 app.use(cors({
-    origin: "https://app-frontend-livid.vercel.app", // apne frontend ka deployed URL yaha daalo
+   
+    origin: "https://app-frontend-l67x.vercel.app", // apne frontend ka deployed URL yaha daalo
   credentials: true
 }));
    
