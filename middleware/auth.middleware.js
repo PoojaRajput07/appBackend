@@ -23,7 +23,7 @@ export async function verifyUser(req,res,next){
             })
             
         }
-        const user=await User.findById(decodedToken?.id).select("-password");
+        const user=await User.findById(decodedToken?._id).select("-password");
         if(!user){
              return res.status(400).json({
                 message:"user not found"

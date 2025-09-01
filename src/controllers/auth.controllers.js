@@ -111,11 +111,22 @@ export async function login(req,res){
 
     }
      const{AccessToken,RefreshAccessToken}=await generateAccessTokennAndRefreshToken(user._id);
-     const loggeduser=await User.findById(user._id).select("-password -RefreshAccessToken");
+     const loggeduser = await User.findById(user._id).select("-password -RefreshToken");
+
    
     return res.status(200)
-    .cookie("AccessToken",AccessToken)
-    .cookie("RefreshToken",RefreshAccessToken)
+    .cookie("AccessToken",AccessToken,{
+        httpOnly:true,
+        secure:true,
+        sameSite:"None"
+
+
+    })
+    .cookie("RefreshToken",RefreshAccessToken,{
+        httpOnly:true,
+        secure:true,
+        sameSite:"None"
+    })
     .json(
         {
             message:"logged in successfully",
@@ -142,11 +153,11 @@ export async function logout(req,res){
     }
    },{new:true})
 
-   const options={
-    httpOnly:true,
-    secure:true
-
-   }
+  const options = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",  // true in production, false in local
+            sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax"
+        };
     return res.status(200).clearCookie("RefreshToken",options)
    .clearCookie("AccessToken",options)
    .json({
@@ -184,7 +195,7 @@ export async function onboard(req,res){
         })
     } catch (error) {
         console.log(error.message);
-        return res.status(404).json({message:"no user found"});
+        return res.status(500).json({message:"no user found"});
         
     }
 
